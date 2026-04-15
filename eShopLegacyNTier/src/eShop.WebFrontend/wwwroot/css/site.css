@@ -1,0 +1,574 @@
+/* ─────────────────────────────────────────────────────────
+   eShop on Containers — Storefront
+   Styles ported from eShopOnWeb (Bootstrap 4 + custom)
+   ───────────────────────────────────────────────────────── */
+
+/* === Variables (from _variables.scss) === */
+/* brand:#00A69C  secondary:#83D01B  bg-dark:#000  fg-bright:#EEE */
+
+/* === Base === */
+@font-face {
+    font-family: Montserrat;
+    font-weight: 400;
+    src: url('https://fonts.gstatic.com/s/montserrat/v26/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCtr6Ew-.woff2') format('woff2');
+}
+@font-face {
+    font-family: Montserrat;
+    font-weight: 700;
+    src: url('https://fonts.gstatic.com/s/montserrat/v26/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCuM70w-.woff2') format('woff2');
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+    font-family: Montserrat, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+}
+
+img { max-width: 100%; border: 0; }
+a { color: inherit; text-decoration: none; }
+
+.container {
+    max-width: 1170px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+/* === Simple Bootstrap-like grid === */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: -15px;
+    margin-right: -15px;
+}
+.row::after { content: ''; display: table; clear: both; }
+[class*="col-"] { position: relative; padding-left: 15px; padding-right: 15px; }
+.col-1  { width: 8.333%; }
+.col-2  { width: 16.666%; }
+.col-3  { width: 25%; }
+.col-4  { width: 33.333%; }
+.col-6  { width: 50%; }
+.col-10 { width: 83.333%; }
+.col-12 { width: 100%; }
+.col-xs-2 { width: 16.666%; }
+.col-xs-3 { width: 25%; }
+.col-xs-12 { width: 100%; }
+@media (min-width: 576px) {
+    .col-sm-6 { width: 50%; }
+}
+@media (min-width: 768px) {
+    .col-md-4 { width: 33.333%; }
+    .col-md-5 { width: 41.666%; }
+    .col-md-6 { width: 50%; }
+}
+@media (min-width: 992px) {
+    .col-lg-1 { width: 8.333%; }
+    .col-lg-4 { width: 33.333%; }
+    .col-lg-7 { width: 58.333%; }
+}
+.text-right { text-align: right; }
+
+/* === App wrapper === */
+.esh-app-wrapper {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* === Header (from app.component.css) === */
+.esh-app-header {
+    margin: 15px;
+}
+
+.esh-app-header img {
+    max-height: 36px;
+}
+
+.esh-app-header .row {
+    align-items: center;
+}
+
+/* === Identity dropdown (from identity.css — exact copy) === */
+.esh-identity {
+    line-height: 3rem;
+    position: relative;
+    text-align: right;
+}
+
+.esh-identity-section {
+    display: inline-block;
+    width: 100%;
+    cursor: default;
+}
+
+.esh-identity-name {
+    display: inline-block;
+}
+
+.esh-identity-name--upper {
+    text-transform: uppercase;
+}
+
+@media screen and (max-width: 768px) {
+    .esh-identity-name { font-size: 0.85rem; }
+}
+
+.esh-identity-image {
+    display: inline-block;
+}
+
+.esh-identity-drop {
+    background: #FFFFFF;
+    height: 10px;
+    width: 10rem;
+    overflow: hidden;
+    padding: .5rem;
+    position: absolute;
+    right: 0;
+    top: 2.5rem;
+    transition: height 0.35s;
+}
+
+.esh-identity:hover .esh-identity-drop {
+    border: 1px solid #EEEEEE;
+    height: 14rem;
+    transition: height 0.35s;
+    z-index: 10;
+}
+
+.esh-identity-item {
+    cursor: pointer;
+    display: block;
+    transition: color 0.35s;
+}
+
+.esh-identity-item:hover {
+    color: #75b918;
+    transition: color 0.35s;
+}
+
+/* === Basket status badge (from basket-status.component.css) === */
+.esh-basketstatus {
+    cursor: pointer;
+    display: inline-block;
+    float: right;
+    position: relative;
+    transition: all 0.35s;
+}
+
+.esh-basketstatus-image {
+    height: 36px;
+    margin-top: .5rem;
+}
+
+.esh-basketstatus-image img {
+    height: 100%;
+}
+
+.esh-basketstatus-badge {
+    background-color: #83D01B;
+    border-radius: 50%;
+    color: #FFFFFF;
+    display: block;
+    height: 1.5rem;
+    left: 50%;
+    position: absolute;
+    text-align: center;
+    top: 0;
+    transform: translateX(-38%);
+    transition: all 0.35s;
+    width: 1.5rem;
+    line-height: 1.5rem;
+    font-size: 0.75rem;
+}
+
+.esh-basketstatus:hover .esh-basketstatus-badge {
+    background-color: transparent;
+    color: #75b918;
+    transition: all 0.35s;
+}
+
+/* === Hero === */
+.esh-catalog-hero {
+    background-image: url("../images/main_banner.png");
+    background-size: cover;
+    height: 260px;
+    width: 100%;
+}
+
+.esh-catalog-title {
+    position: relative;
+    top: 74.28571px;
+}
+
+/* === Filters (from catalog.component.css) === */
+.esh-catalog-filters {
+    background-color: #00A69C;
+    height: 65px;
+}
+
+.esh-catalog-filter {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: transparent;
+    border: 1px solid #00d9cc;
+    color: #FFFFFF;
+    cursor: pointer;
+    font-family: Montserrat, sans-serif;
+    margin-right: 1rem;
+    margin-top: .5rem;
+    min-width: 140px;
+    outline-color: #83D01B;
+    padding: 1.5rem 0.5rem 0 0.5rem;
+}
+.esh-catalog-filter option { background-color: #00A69C; }
+
+.esh-catalog-label {
+    display: inline-block;
+    position: relative;
+    z-index: 0;
+}
+.esh-catalog-label::before {
+    color: rgba(255, 255, 255, 0.5);
+    content: attr(data-title);
+    font-size: 0.65rem;
+    margin-left: 0.5rem;
+    margin-top: 0.65rem;
+    position: absolute;
+    text-transform: uppercase;
+    z-index: 1;
+}
+.esh-catalog-label::after {
+    background-image: url("../images/arrow-down.png");
+    background-size: 10px 7px;
+    content: '';
+    height: 7px;
+    position: absolute;
+    right: 1.5rem;
+    top: 2.5rem;
+    width: 10px;
+    z-index: 1;
+}
+
+.esh-catalog-send {
+    background-color: #83D01B;
+    border: 0;
+    color: #FFFFFF;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: -1.5rem;
+    padding: 0.5rem 1rem;
+    transition: all 0.35s;
+}
+.esh-catalog-send:hover {
+    background-color: #4a760f;
+    transition: all 0.35s;
+}
+.esh-catalog-send img {
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+    filter: brightness(0) invert(1);
+}
+
+/* === Catalog items (from catalog.component.css) === */
+.esh-catalog-items {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0;  /* remove inline-block gaps */
+}
+
+.esh-catalog-item {
+    margin-bottom: 1.5rem;
+    text-align: center;
+    width: 33%;
+    display: inline-block;
+    float: none !important;
+    vertical-align: top;
+    font-size: 16px;  /* restore */
+}
+@media screen and (max-width: 1024px) {
+    .esh-catalog-item { width: 50%; }
+}
+@media screen and (max-width: 768px) {
+    .esh-catalog-item { width: 100%; }
+}
+
+.esh-catalog-thumbnail {
+    max-width: 370px;
+    width: 100%;
+}
+
+.esh-catalog-button {
+    background-color: #83D01B;
+    border: 0;
+    color: #FFFFFF;
+    cursor: pointer;
+    font-family: Montserrat, sans-serif;
+    font-size: 1rem;
+    height: 3rem;
+    margin-top: 1rem;
+    transition: all 0.35s;
+    width: 80%;
+}
+.esh-catalog-button.is-disabled {
+    opacity: .5;
+    pointer-events: none;
+}
+.esh-catalog-button:hover {
+    background-color: #4a760f;
+    transition: all 0.35s;
+}
+
+.esh-catalog-name {
+    font-size: 1rem;
+    font-weight: 300;
+    margin-top: .5rem;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.esh-catalog-price {
+    font-size: 28px;
+    font-weight: 900;
+    text-align: center;
+}
+.esh-catalog-price::before { content: '$'; }
+
+/* === Pager (from pager.css) === */
+.esh-pager {
+    padding-top: 1rem;
+    text-align: center;
+}
+.esh-pager-item {
+    margin: 0 5vw;
+}
+.esh-pager-item.is-disabled {
+    opacity: .5;
+    pointer-events: none;
+}
+.esh-pager-item--navigable {
+    cursor: pointer;
+    display: inline-block;
+}
+.esh-pager-item--navigable:hover {
+    color: #83D01B;
+}
+@media screen and (max-width: 1280px) {
+    .esh-pager-item { font-size: 0.85rem; }
+}
+@media screen and (max-width: 1024px) {
+    .esh-pager-item { margin: 0 2.5vw; }
+}
+
+/* === Basket page (from basket.component.css) === */
+.esh-basket {
+    min-height: 80vh;
+}
+.esh-basket-titles {
+    padding-bottom: 1rem;
+    padding-top: 2rem;
+}
+.esh-basket-titles--clean {
+    padding-bottom: 0;
+    padding-top: 0;
+}
+.esh-basket-title {
+    text-transform: uppercase;
+}
+.esh-basket-items-row {
+    border-bottom: 1px solid #EEEEEE;
+    padding: .5rem 0;
+}
+.esh-basket-items-row:last-of-type {
+    border-color: transparent;
+}
+.esh-basket-item {
+    font-size: 1rem;
+    font-weight: 300;
+}
+.esh-basket-item--middle {
+    line-height: 8rem;
+}
+@media screen and (max-width: 1024px) {
+    .esh-basket-item--middle { line-height: 1rem; }
+}
+.esh-basket-item--mark {
+    color: #00A69C;
+}
+.esh-basket-image {
+    height: 8rem;
+}
+.esh-basket-input {
+    line-height: 1rem;
+    width: 100%;
+    max-width: 80px;
+    font-family: Montserrat, sans-serif;
+    font-size: 1rem;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid #ddd;
+}
+.esh-basket-checkout {
+    background-color: #83D01B;
+    border: 0;
+    border-radius: 0;
+    color: #FFFFFF;
+    cursor: pointer;
+    display: inline-block;
+    font-family: Montserrat, sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    margin-top: 1rem;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    text-transform: uppercase;
+    transition: all 0.35s;
+}
+.esh-basket-checkout:hover {
+    background-color: #4a760f;
+    transition: all 0.35s;
+}
+.esh-basket-checkout:visited { color: #FFFFFF; }
+
+.esh-basket-empty-msg {
+    padding: 3rem 0 1rem;
+    font-weight: 300;
+}
+
+/* === Footer (from app.component.css) === */
+.esh-app-footer {
+    background-color: #000000;
+    border-top: 1px solid #EEEEEE;
+    margin-top: 2.5rem;
+    padding-bottom: 2.5rem;
+    padding-top: 2.5rem;
+    width: 100%;
+    bottom: 0;
+}
+
+.esh-app-footer-text {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.85rem;
+}
+
+/* === Loading / Error states === */
+.esh-catalog-loading {
+    text-align: center;
+    padding: 4rem 0;
+    color: #00A69C;
+    font-size: 1.2rem;
+    font-weight: 300;
+}
+
+.esh-catalog-error {
+    text-align: center;
+    padding: 3rem 0;
+    color: #666;
+    line-height: 1.8;
+}
+
+.esh-catalog-error code {
+    background: #f0f0f0;
+    padding: 0.2em 0.5em;
+}
+
+.esh-catalog-error .esh-catalog-button {
+    width: auto;
+    padding: 0 2rem;
+    margin-top: 1rem;
+}
+
+.esh-catalog-empty {
+    width: 100%;
+    text-align: center;
+    padding: 3rem;
+    color: #999;
+    text-transform: uppercase;
+    font-size: 16px;
+}
+
+/* === Login page === */
+.esh-login {
+    min-height: 80vh;
+    display: flex;
+    justify-content: center;
+    padding-top: 3rem;
+}
+
+.esh-login-container {
+    width: 100%;
+    max-width: 420px;
+}
+
+.esh-login-title {
+    text-transform: uppercase;
+    font-weight: 300;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.esh-login-error {
+    background-color: #ffe0e0;
+    border: 1px solid #ff0000;
+    color: #cc0000;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.esh-login-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.esh-login-label {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-top: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.esh-login-input {
+    border: 1px solid #ddd;
+    font-family: Montserrat, sans-serif;
+    font-size: 1rem;
+    padding: 0.75rem;
+    outline-color: #00A69C;
+}
+
+.esh-login-button {
+    background-color: #83D01B;
+    border: 0;
+    color: #FFFFFF;
+    cursor: pointer;
+    font-family: Montserrat, sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    margin-top: 1.5rem;
+    padding: 0.85rem;
+    text-transform: uppercase;
+    transition: all 0.35s;
+}
+.esh-login-button:hover {
+    background-color: #4a760f;
+    transition: all 0.35s;
+}
+
+.esh-login-demo {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: #f8f8f8;
+    border: 1px solid #eee;
+    font-size: 0.85rem;
+}
+.esh-login-demo p { margin: 0 0 0.5rem; }
+.esh-login-demo-table td { padding: 0.15rem 0.5rem 0.15rem 0; }
+.esh-login-demo-table td:first-child { font-weight: 700; }

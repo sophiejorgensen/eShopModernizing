@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>eShop on Containers — Login</title>
+    <link rel="stylesheet" href="css/site.css" />
+</head>
+<body>
+<div class="esh-app-wrapper">
+    <!-- ═══════ HEADER ═══════ -->
+    <header class="esh-app-header">
+        <div class="container">
+            <div class="row">
+                <div class="col-6">
+                    <a href="index.html"><img src="images/brand.png" alt="eShop on Containers" /></a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ═══════ LOGIN FORM ═══════ -->
+    <section class="container esh-login">
+        <div class="esh-login-container">
+            <h2 class="esh-login-title">Login</h2>
+
+            <div id="loginError" class="esh-login-error" style="display:none;">
+                Invalid login attempt.
+            </div>
+
+            <form method="POST" action="/api/account/login" class="esh-login-form">
+                <input type="hidden" name="returnUrl" id="returnUrl" value="/" />
+
+                <label class="esh-login-label" for="email">Email</label>
+                <input class="esh-login-input" type="email" id="email" name="email"
+                       placeholder="Email" required autofocus />
+
+                <label class="esh-login-label" for="password">Password</label>
+                <input class="esh-login-input" type="password" id="password" name="password"
+                       placeholder="Password" required />
+
+                <button type="submit" class="esh-login-button">Log in</button>
+            </form>
+
+            <div class="esh-login-demo">
+                <p><strong>Demo credentials:</strong></p>
+                <table class="esh-login-demo-table">
+                    <tr><td>User:</td><td>demouser@microsoft.com</td></tr>
+                    <tr><td>Admin:</td><td>admin@microsoft.com</td></tr>
+                    <tr><td>Password:</td><td>Pass@word1</td></tr>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ FOOTER ═══════ -->
+    <footer class="esh-app-footer">
+        <div class="container">
+            <span class="esh-app-footer-text">© eShop. All rights reserved</span>
+        </div>
+    </footer>
+</div>
+
+<script>
+(function () {
+    // Show error message if redirected with ?error=1
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('error') === '1') {
+        document.getElementById('loginError').style.display = 'block';
+    }
+    // Pass return URL through
+    var returnUrl = params.get('returnUrl') || '/';
+    document.getElementById('returnUrl').value = returnUrl;
+})();
+</script>
+</body>
+</html>
