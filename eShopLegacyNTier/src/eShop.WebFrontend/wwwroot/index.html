@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>eShop on Containers — Catalog</title>
+    <link rel="stylesheet" href="css/site.css" />
+</head>
+<body>
+<div class="esh-app-wrapper">
+    <!-- ═══════ HEADER ═══════ -->
+    <header class="esh-app-header">
+        <div class="container">
+            <div class="row">
+                <div class="col-6">
+                    <a href="index.html"><img src="images/brand.png" alt="eShop on Containers" /></a>
+                </div>
+                <div class="col-6 text-right">
+
+                    <!-- identity: populated by JS based on auth state -->
+                    <div class="esh-identity" id="identitySection">
+                        <a href="login.html" class="esh-identity-name esh-identity-name--upper">Login</a>
+                    </div>
+
+                    <!-- basket badge -->
+                    <a href="basket.html" class="esh-basketstatus">
+                        <div class="esh-basketstatus-image">
+                            <img src="images/cart.png" alt="basket" />
+                        </div>
+                        <div id="basketBadge" class="esh-basketstatus-badge">0</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ═══════ HERO ═══════ -->
+    <section class="esh-catalog-hero">
+        <div class="container">
+            <img class="esh-catalog-title" src="images/main_banner_text.png" alt="Ready to dress up?" />
+        </div>
+    </section>
+
+    <!-- ═══════ FILTER BAR ═══════ -->
+    <section class="esh-catalog-filters">
+        <div class="container" style="display:flex;align-items:center;height:100%;">
+            <label class="esh-catalog-label" data-title="Brand">
+                <select id="filterBrand" class="esh-catalog-filter">
+                    <option value="">All</option>
+                </select>
+            </label>
+            <label class="esh-catalog-label" data-title="Type">
+                <select id="filterType" class="esh-catalog-filter">
+                    <option value="">All</option>
+                </select>
+            </label>
+            <button id="btnFilter" class="esh-catalog-send" title="Apply filter">
+                <img src="images/arrow-right.svg" alt="Apply" />
+            </button>
+        </div>
+    </section>
+
+    <!-- ═══════ CATALOG GRID ═══════ -->
+    <section class="container">
+        <div id="catalogItems" class="esh-catalog-items">
+            <div class="esh-catalog-loading">Loading catalog…</div>
+        </div>
+
+        <!-- pager -->
+        <div class="esh-pager">
+            <span id="pagerPrev" class="esh-pager-item esh-pager-item--navigable is-disabled"
+                  onclick="changePage(-1)">Previous</span>
+            <span id="pagerLabel" class="esh-pager-item">Showing items 1 – 0 of 0</span>
+            <span id="pagerNext" class="esh-pager-item esh-pager-item--navigable is-disabled"
+                  onclick="changePage(1)">Next</span>
+        </div>
+    </section>
+
+    <!-- ═══════ FOOTER ═══════ -->
+    <footer class="esh-app-footer">
+        <div class="container">
+            <span class="esh-app-footer-text">© eShop. All rights reserved</span>
+        </div>
+    </footer>
+</div>
+
+<!-- ═══════ SCRIPTS ═══════ -->
+<script src="js/basket-store.js"></script>
+<script>
+(function () {
+    'use strict';
+
+    var API = 'http://localhost:5001/api/catalog';
+    var PAGE_SIZE = 9;
+    var pageIndex = 0;
+    var totalItems = 0;
+    var brands = [], types = [];
+
+    init();
+
+    function init() {
+        updateBadge();
+        checkAuth();
+        fetchFilters();
+        fetchCatalog();
+    }
+
+    /* ── Auth state ── */
+    function checkAuth() {
+        fetch('/api/account/user')
+            .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+            .then(function (user) {
+                var el = document.getElementById('identitySection');
+                el.innerHTML =
+                    '<section class="esh-identity-section">' +
+                        '<div class="esh-identity-name esh-identity-name--upper">' + user.email + '</div>' +
+                        '<img class="esh-identity-image" src="images/arrow-down.png" style="width:10px;margin-left:4px;" />' +
+                    '</section>' +
+                    '<div class="esh-identity-drop">' +
+                        '<a class="esh-identity-item" href="#">' +
+                            '<img src="images/my_orders.png" style="width:14px;vertical-align:middle;" /> My orders</a>' +
+                        '<a class="esh-identity-item" href="#" onclick="doLogout(); return false;">' +
+                            '<img src="images/logout.png" style="width:14px;vertical-align:middle;" /> Log Out</a>' +
+                    '</div>';
+            })
+            .catch(function () { /* not logged in – keep Login link */ });
+    }
+
+    window.doLogout = function () {
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/api/account/logout';
+        document.body.appendChild(form);
+        form.submit();
+    };
+
+    /* ── Badge ── */
+    function updateBadge() {
+        document.getElementById('basketBadge').textContent = BasketStore.totalItems();
+    }
+
+    /* ── Filter dropdowns ── */
+    function fetchFilters() {
+        fetch(API + '/catalogbrands')
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                brands = data;
+                fillSelect('filterBrand', data);
+            })
+            .catch(function () {});
+        fetch(API + '/catalogtypes')
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                types = data;
+                fillSelect('filterType', data);
+            })
+            .catch(function () {});
+    }
+    function fillSelect(id, items) {
+        var sel = document.getElementById(id);
+        items.forEach(function (item) {
+            var o = document.createElement('option');
+            o.value = item.id || item.Id;
+            o.textContent = item.brand || item.Brand || item.type || item.Type;
+            sel.appendChild(o);
+        });
+    }
+
+    document.getElementById('btnFilter').addEventListener('click', function () {
+        pageIndex = 0;
+        fetchCatalog();
+    });
+
+    /* ── Catalog fetch ── */
+    function fetchCatalog() {
+        var url = API + '/items?pageSize=' + PAGE_SIZE + '&pageIndex=' + pageIndex;
+
+        var brandId = document.getElementById('filterBrand').value;
+        var typeId  = document.getElementById('filterType').value;
+        if (brandId) url += '&catalogBrandId=' + brandId;
+        if (typeId)  url += '&catalogTypeId=' + typeId;
+
+        var grid = document.getElementById('catalogItems');
+        grid.innerHTML = '<div class="esh-catalog-loading">Loading catalog…</div>';
+
+        fetch(url)
+            .then(function (r) { return r.json(); })
+            .then(function (result) {
+                /* Catalog.Service returns: { pageIndex, pageSize, count, data } */
+                var items = result.data || result.Data || result;
+                totalItems = result.count != null ? result.count : (result.Count || items.length);
+                renderGrid(Array.isArray(items) ? items : []);
+                renderPager();
+            })
+            .catch(function (err) {
+                grid.innerHTML =
+                    '<div class="esh-catalog-error">' +
+                    '<p>Could not reach the Catalog service.</p>' +
+                    '<p>Make sure <code>Catalog.Service</code> is running on <strong>localhost:5001</strong>.</p>' +
+                    '<button class="esh-catalog-button" onclick="location.reload()">Retry</button>' +
+                    '</div>';
+            });
+    }
+    window.fetchCatalog = fetchCatalog;
+
+    /* ── Render grid ── */
+    function renderGrid(items) {
+        var grid = document.getElementById('catalogItems');
+        if (!items.length) {
+            grid.innerHTML = '<div class="esh-catalog-empty">No products found</div>';
+            return;
+        }
+        var html = '';
+        items.forEach(function (item) {
+            var picFile = item.pictureFileName || item.PictureFileName;
+            var pic = picFile
+                ? 'pics/' + picFile
+                : 'pics/eCatalog-item-default.png';
+            var name = item.name || item.Name || '';
+            var itemPrice = item.price != null ? item.price : (item.Price != null ? item.Price : 0);
+            var itemId = item.id || item.Id;
+            var price = Number(itemPrice).toFixed(2);
+            html +=
+                '<div class="esh-catalog-item">' +
+                    '<img class="esh-catalog-thumbnail" src="' + pic + '" alt="' + name.replace(/"/g,'&quot;') + '" />' +
+                    '<div class="esh-catalog-name">' + name + '</div>' +
+                    '<div class="esh-catalog-price">' + price + '</div>' +
+                    '<button class="esh-catalog-button" onclick="addToBasket(' +
+                        itemId + ',\'' + name.replace(/'/g,"\\'") + '\',' + itemPrice +
+                        ',\'' + pic + '\')">ADD TO BASKET</button>' +
+                '</div>';
+        });
+        grid.innerHTML = html;
+    }
+
+    /* ── Add to basket ── */
+    window.addToBasket = function (id, name, price, pic) {
+        BasketStore.add({ id: id, name: name, unitPrice: price, picture: pic });
+        updateBadge();
+        /* brief flash on badge */
+        var b = document.getElementById('basketBadge');
+        b.style.transform = 'translateX(-38%) scale(1.4)';
+        setTimeout(function(){ b.style.transform = 'translateX(-38%)'; }, 200);
+    };
+
+    /* ── Pager ── */
+    function renderPager() {
+        var totalPages = Math.ceil(totalItems / PAGE_SIZE) || 1;
+        var start = pageIndex * PAGE_SIZE + 1;
+        var end = Math.min((pageIndex + 1) * PAGE_SIZE, totalItems);
+        document.getElementById('pagerLabel').textContent =
+            'Showing items ' + start + ' – ' + end + ' of ' + totalItems;
+        toggleClass('pagerPrev', pageIndex === 0);
+        toggleClass('pagerNext', pageIndex >= totalPages - 1);
+    }
+    function toggleClass(id, disabled) {
+        var el = document.getElementById(id);
+        if (disabled) el.classList.add('is-disabled');
+        else el.classList.remove('is-disabled');
+    }
+    window.changePage = function (dir) {
+        pageIndex += dir;
+        fetchCatalog();
+    };
+})();
+</script>
+</body>
+</html>

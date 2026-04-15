@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>eShop - Microservices Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f1117; color: #e1e4e8; }
+
+        .header {
+            background: linear-gradient(135deg, #1a1f35 0%, #0d1117 100%);
+            border-bottom: 2px solid #30363d;
+            padding: 20px 40px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .header h1 { font-size: 24px; color: #58a6ff; }
+        .header .badge {
+            background: #da3633; color: white; padding: 4px 12px;
+            border-radius: 12px; font-size: 12px; font-weight: 600;
+        }
+        .header .tech {
+            display: flex; gap: 8px;
+        }
+        .header .tech span {
+            background: #21262d; border: 1px solid #30363d;
+            padding: 4px 10px; border-radius: 6px; font-size: 11px; color: #8b949e;
+        }
+
+        .services-bar {
+            display: flex; gap: 0; border-bottom: 1px solid #21262d;
+        }
+        .service-indicator {
+            flex: 1; padding: 12px 20px; text-align: center;
+            border-right: 1px solid #21262d; font-size: 13px;
+        }
+        .service-indicator .dot {
+            display: inline-block; width: 8px; height: 8px;
+            border-radius: 50%; margin-right: 6px;
+        }
+        .service-indicator .dot.green { background: #3fb950; box-shadow: 0 0 6px #3fb950; }
+        .service-indicator .dot.red { background: #da3633; }
+        .service-indicator .name { font-weight: 600; color: #c9d1d9; }
+        .service-indicator .port { color: #484f58; margin-left: 4px; }
+        .service-indicator .aca-tag {
+            display: block; font-size: 10px; color: #6e7681; margin-top: 2px;
+        }
+
+        .discount-banner {
+            background: linear-gradient(90deg, #da3633 0%, #b62324 100%);
+            padding: 12px 40px; text-align: center; font-size: 16px;
+            font-weight: 600; display: none;
+        }
+        .discount-banner .source {
+            font-size: 11px; font-weight: 400; opacity: 0.7; margin-left: 12px;
+        }
+
+        .main { padding: 30px 40px; }
+
+        .section-title {
+            font-size: 18px; font-weight: 600; margin-bottom: 16px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .section-title .source-badge {
+            font-size: 11px; background: #1f6feb; color: white;
+            padding: 2px 8px; border-radius: 4px; font-weight: 500;
+        }
+
+        .catalog-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px; margin-bottom: 40px;
+        }
+        .catalog-card {
+            background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+            padding: 20px; transition: border-color 0.2s;
+        }
+        .catalog-card:hover { border-color: #58a6ff; }
+        .catalog-card .item-name { font-size: 16px; font-weight: 600; color: #c9d1d9; }
+        .catalog-card .item-desc { font-size: 13px; color: #8b949e; margin: 6px 0; }
+        .catalog-card .item-meta {
+            display: flex; justify-content: space-between; align-items: center; margin-top: 12px;
+        }
+        .catalog-card .price { font-size: 20px; font-weight: 700; color: #3fb950; }
+        .catalog-card .price.discounted { color: #f0883e; }
+        .catalog-card .original-price {
+            text-decoration: line-through; color: #484f58; font-size: 14px; margin-right: 8px;
+        }
+        .catalog-card .badges { display: flex; gap: 6px; }
+        .catalog-card .badge {
+            font-size: 11px; padding: 2px 8px; border-radius: 4px;
+            background: #21262d; color: #8b949e; border: 1px solid #30363d;
+        }
+
+        .stock-section {
+            background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+            padding: 24px; margin-bottom: 40px;
+        }
+        .stock-table { width: 100%; border-collapse: collapse; }
+        .stock-table th {
+            text-align: left; padding: 10px 12px; border-bottom: 2px solid #30363d;
+            font-size: 12px; text-transform: uppercase; color: #8b949e;
+        }
+        .stock-table td { padding: 10px 12px; border-bottom: 1px solid #21262d; font-size: 14px; }
+        .stock-low { color: #da3633; font-weight: 600; }
+        .stock-ok { color: #3fb950; }
+
+        .event-log {
+            background: #0d1117; border: 1px solid #30363d; border-radius: 8px;
+            padding: 16px; max-height: 200px; overflow-y: auto; font-family: 'Cascadia Code', monospace;
+            font-size: 12px; line-height: 1.8;
+        }
+        .event-log .event {
+            padding: 2px 0; border-bottom: 1px solid #161b22;
+        }
+        .event-log .timestamp { color: #484f58; }
+        .event-log .event-type { color: #d2a8ff; font-weight: 600; }
+        .event-log .event-data { color: #8b949e; }
+
+        .actions-bar {
+            display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;
+        }
+        button {
+            background: #21262d; border: 1px solid #30363d; color: #c9d1d9;
+            padding: 8px 16px; border-radius: 6px; cursor: pointer;
+            font-size: 13px; transition: all 0.2s;
+        }
+        button:hover { background: #30363d; border-color: #58a6ff; }
+        button.primary { background: #1f6feb; border-color: #1f6feb; color: white; }
+        button.primary:hover { background: #388bfd; }
+        button.danger { background: #da3633; border-color: #da3633; color: white; }
+
+        .loading { color: #484f58; font-style: italic; padding: 20px; text-align: center; }
+        .error-msg { color: #da3633; padding: 12px; background: #1c0d0d; border-radius: 6px; margin: 8px 0; }
+
+        .architecture-note {
+            background: #0d1117; border: 1px dashed #30363d; border-radius: 8px;
+            padding: 20px; margin-bottom: 30px; font-size: 13px; color: #8b949e; line-height: 1.6;
+        }
+        .architecture-note strong { color: #58a6ff; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div>
+        <h1>eShop Microservices Dashboard</h1>
+    </div>
+    <div class="tech">
+        <a href="/shop.html" style="color:#58a6ff;text-decoration:none;border:1px solid #30363d;padding:4px 12px;border-radius:6px;font-size:12px;">← Back to Shop</a>
+        <span>.NET Framework 4.7.2</span>
+        <span>OWIN Self-Host</span>
+        <span>Entity Framework 6</span>
+        <span class="badge" style="background: #da3633;">Pre-Upgrade</span>
+    </div>
+</div>
+
+<div class="services-bar">
+    <div class="service-indicator" id="svc-catalog">
+        <span class="dot red" id="dot-catalog"></span>
+        <span class="name">Catalog.Service</span>
+        <span class="port">:5001</span>
+        <span class="aca-tag">ACA: catalog-api (external, HTTP scaling 1-10)</span>
+    </div>
+    <div class="service-indicator" id="svc-discount">
+        <span class="dot red" id="dot-discount"></span>
+        <span class="name">Discount.Service</span>
+        <span class="port">:5002</span>
+        <span class="aca-tag">ACA: discount-api (internal only, Dapr invocation)</span>
+    </div>
+    <div class="service-indicator" id="svc-worker">
+        <span class="dot red" id="dot-worker"></span>
+        <span class="name">Stock.Worker</span>
+        <span class="port">:5003</span>
+        <span class="aca-tag">ACA: stock-worker (scale-to-zero, event-driven)</span>
+    </div>
+</div>
+
+<div class="discount-banner" id="discount-banner"></div>
+
+<div class="main">
+    <div class="architecture-note">
+        This dashboard calls <strong>three independent services</strong>.
+        Each service runs as its own process — on Azure Container Apps, each becomes a separate container app
+        with independent scaling, health checks, and ingress rules.
+        The <strong>IEventBus</strong> currently routes events in-memory — after migration, this becomes <strong>Dapr pub/sub</strong> with Azure Service Bus.
+    </div>
+
+    <div class="actions-bar">
+        <button class="primary" onclick="refreshAll()">Refresh All Services</button>
+        <button onclick="addSampleItem()">+ Add Catalog Item</button>
+        <button class="danger" onclick="clearEvents()">Clear Event Log</button>
+    </div>
+
+    <!-- Catalog Section -->
+    <div class="section-title">
+        Catalog Items
+        <span class="source-badge">Catalog.Service :5001</span>
+    </div>
+    <div class="catalog-grid" id="catalog-grid">
+        <div class="loading">Loading catalog items...</div>
+    </div>
+
+    <!-- Stock Section -->
+    <div class="section-title">
+        Stock Levels
+        <span class="source-badge">Stock.Worker :5003</span>
+    </div>
+    <div class="stock-section">
+        <table class="stock-table">
+            <thead><tr><th>Item</th><th>Date</th><th>Available Stock</th><th>Status</th></tr></thead>
+            <tbody id="stock-body">
+                <tr><td colspan="4" class="loading">Waiting for catalog data...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Event Log -->
+    <div class="section-title">
+        Event Bus Activity
+        <span class="source-badge">IEventBus &rarr; Dapr pub/sub on ACA</span>
+    </div>
+    <div class="event-log" id="event-log">
+        <div class="event">
+            <span class="timestamp">[--:--:--]</span>
+            <span class="event-data">Waiting for events...</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    const CATALOG_URL = 'http://localhost:5001';
+    const DISCOUNT_URL = 'http://localhost:5002';
+    const WORKER_URL = 'http://localhost:5003';
+
+    let currentDiscount = null;
+    let catalogItems = [];
+
+    function logEvent(type, data) {
+        const log = document.getElementById('event-log');
+        const now = new Date().toLocaleTimeString();
+        const div = document.createElement('div');
+        div.className = 'event';
+        div.innerHTML = '<span class="timestamp">[' + now + ']</span> ' +
+            '<span class="event-type">' + type + '</span> ' +
+            '<span class="event-data">' + data + '</span>';
+        log.insertBefore(div, log.firstChild);
+    }
+
+    function clearEvents() {
+        document.getElementById('event-log').innerHTML = '';
+        logEvent('System', 'Event log cleared');
+    }
+
+    async function checkService(url, dotId) {
+        try {
+            const r = await fetch(url, { method: 'GET', mode: 'cors' });
+            document.getElementById(dotId).className = 'dot green';
+            return true;
+        } catch (e) {
+            document.getElementById(dotId).className = 'dot red';
+            return false;
+        }
+    }
+
+    async function loadDiscount() {
+        const ok = await checkService(DISCOUNT_URL + '/api/discounts/active', 'dot-discount');
+        if (!ok) {
+            logEvent('Discount.Service', 'OFFLINE - start with: dotnet run --project src\\Discount.Service');
+            return;
+        }
+        try {
+            const r = await fetch(DISCOUNT_URL + '/api/discounts/active');
+            if (r.status === 204 || r.status === 404) {
+                document.getElementById('discount-banner').style.display = 'none';
+                currentDiscount = null;
+                logEvent('DiscountQuery', 'No active discount today');
+                return;
+            }
+            currentDiscount = await r.json();
+            const pct = Math.round(currentDiscount.size * 100);
+            const banner = document.getElementById('discount-banner');
+            banner.innerHTML = '&#127881; ' + pct + '% OFF — Sale ends ' +
+                new Date(currentDiscount.end).toLocaleDateString() + '!' +
+                '<span class="source">via Discount.Service :5002</span>';
+            banner.style.display = 'block';
+            logEvent('DiscountActivatedEvent', pct + '% discount active');
+        } catch (e) {
+            currentDiscount = null;
+        }
+    }
+
+    async function loadCatalog() {
+        const ok = await checkService(CATALOG_URL + '/api/catalog/brands', 'dot-catalog');
+        if (!ok) {
+            document.getElementById('catalog-grid').innerHTML =
+                '<div class="error-msg">Catalog.Service is offline. It should be running on port 5001.</div>';
+            return;
+        }
+        try {
+            const r = await fetch(CATALOG_URL + '/api/catalog/items');
+            catalogItems = await r.json();
+            logEvent('CatalogQuery', 'Loaded ' + catalogItems.length + ' items from Catalog.Service');
+            renderCatalog();
+        } catch (e) {
+            document.getElementById('catalog-grid').innerHTML =
+                '<div class="error-msg">Error loading catalog: ' + e.message + '</div>';
+        }
+    }
+
+    function renderCatalog() {
+        const grid = document.getElementById('catalog-grid');
+        if (catalogItems.length === 0) {
+            grid.innerHTML = '<div class="loading">No catalog items found.</div>';
+            return;
+        }
+        grid.innerHTML = catalogItems.map(function(item) {
+            const hasDiscount = currentDiscount && currentDiscount.size > 0;
+            const discountedPrice = hasDiscount ? (item.price * (1 - currentDiscount.size)).toFixed(2) : null;
+            const brandName = item.catalogBrand ? item.catalogBrand.brand : 'Brand ' + item.catalogBrandId;
+            const typeName = item.catalogType ? item.catalogType.type : 'Type ' + item.catalogTypeId;
+
+            return '<div class="catalog-card">' +
+                '<div class="item-name">' + escapeHtml(item.name) + '</div>' +
+                '<div class="item-desc">' + escapeHtml(item.description || '') + '</div>' +
+                '<div class="item-meta">' +
+                    '<div>' +
+                        (hasDiscount ?
+                            '<span class="original-price">$' + item.price.toFixed(2) + '</span>' +
+                            '<span class="price discounted">$' + discountedPrice + '</span>'
+                            : '<span class="price">$' + item.price.toFixed(2) + '</span>') +
+                    '</div>' +
+                    '<div class="badges">' +
+                        '<span class="badge">' + escapeHtml(brandName) + '</span>' +
+                        '<span class="badge">' + escapeHtml(typeName) + '</span>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+    }
+
+    let stockData = {};
+
+    async function loadStock() {
+        try {
+            var r = await fetch(WORKER_URL + '/api/stock');
+            var stocks = await r.json();
+            stockData = {};
+            stocks.forEach(function(s) { stockData[s.catalogItemId] = s; });
+            logEvent('StockQuery', 'Loaded ' + stocks.length + ' stock entries from Stock.Worker');
+        } catch(e) {
+            logEvent('Stock.Worker', 'Could not fetch stock data: ' + e.message);
+        }
+        renderStock();
+    }
+
+    function renderStock() {
+        const body = document.getElementById('stock-body');
+        if (catalogItems.length === 0) {
+            body.innerHTML = '<tr><td colspan="4" class="loading">Waiting for catalog data...</td></tr>';
+            return;
+        }
+        body.innerHTML = catalogItems.map(function(item) {
+            var entry = stockData[item.id];
+            var stock = entry ? entry.availableStock : 0;
+            var date = entry ? new Date(entry.date).toLocaleDateString() : '\u2014';
+            var statusClass = stock < 10 ? 'stock-low' : 'stock-ok';
+            var statusText = stock < 10 ? 'LOW STOCK' : 'In Stock';
+            return '<tr>' +
+                '<td>' + escapeHtml(item.name) + '</td>' +
+                '<td>' + date + '</td>' +
+                '<td class="' + statusClass + '">' + stock + ' units</td>' +
+                '<td class="' + statusClass + '">' + statusText + '</td>' +
+            '</tr>';
+        }).join('');
+    }
+
+    async function addSampleItem() {
+        const names = ['Azure Backpack', 'VS Code Sticker Pack', '.NET Cap', 'GitHub Hoodie', 'TypeScript Mug'];
+        const name = names[Math.floor(Math.random() * names.length)];
+        const item = {
+            name: name,
+            description: 'Demo item added from dashboard',
+            price: (Math.random() * 20 + 5).toFixed(2),
+            pictureFileName: 'placeholder.png',
+            catalogBrandId: Math.floor(Math.random() * 5) + 1,
+            catalogTypeId: Math.floor(Math.random() * 4) + 1
+        };
+        try {
+            const r = await fetch(CATALOG_URL + '/api/catalog/items', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(item)
+            });
+            if (r.ok) {
+                logEvent('CatalogItemCreatedEvent', '"' + name + '" created — Stock.Worker will react!');
+                logEvent('EventBus.Publish', 'CatalogItemCreatedEvent { ItemId: ?, Name: "' + name + '" }');
+                await loadCatalog();
+            } else {
+                logEvent('Error', 'Failed to create item: HTTP ' + r.status);
+            }
+        } catch (e) {
+            logEvent('Error', 'Catalog.Service unreachable: ' + e.message);
+        }
+    }
+
+    function refreshAll() {
+        logEvent('System', 'Refreshing all services...');
+        loadDiscount().then(loadCatalog);
+        checkService(WORKER_URL + '/health', 'dot-worker').then(function(ok) {
+            logEvent('Stock.Worker', ok ? 'Health check OK — listening for events' : 'OFFLINE — start Stock.Worker');            if (ok) loadStock();        });
+    }
+
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // Initial load
+    refreshAll();
+    // Auto-refresh every 15 seconds
+    setInterval(refreshAll, 15000);
+</script>
+
+</body>
+</html>

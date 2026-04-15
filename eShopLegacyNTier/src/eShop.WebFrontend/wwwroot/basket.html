@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>eShop on Containers — Basket</title>
+    <link rel="stylesheet" href="css/site.css" />
+</head>
+<body>
+<div class="esh-app-wrapper">
+    <!-- ═══════ HEADER ═══════ -->
+    <header class="esh-app-header">
+        <div class="container">
+            <div class="row">
+                <div class="col-6">
+                    <a href="index.html"><img src="images/brand.png" alt="eShop on Containers" /></a>
+                </div>
+                <div class="col-6 text-right">
+                    <div class="esh-identity" id="identitySection">
+                        <a href="login.html" class="esh-identity-name esh-identity-name--upper">Login</a>
+                    </div>
+                    <a href="basket.html" class="esh-basketstatus">
+                        <div class="esh-basketstatus-image">
+                            <img src="images/cart.png" alt="basket" />
+                        </div>
+                        <div id="basketBadge" class="esh-basketstatus-badge">0</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ═══════ BASKET CONTENT ═══════ -->
+    <section class="container esh-basket">
+        <div id="basketContent"></div>
+    </section>
+
+    <!-- ═══════ FOOTER ═══════ -->
+    <footer class="esh-app-footer">
+        <div class="container">
+            <span class="esh-app-footer-text">© eShop. All rights reserved</span>
+        </div>
+    </footer>
+</div>
+
+<!-- ═══════ SCRIPTS ═══════ -->
+<script src="js/basket-store.js"></script>
+<script>
+(function () {
+    'use strict';
+
+    updateBadge();
+    checkAuth();
+    renderBasket();
+
+    function checkAuth() {
+        fetch('/api/account/user')
+            .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+            .then(function (user) {
+                var el = document.getElementById('identitySection');
+                el.innerHTML =
+                    '<section class="esh-identity-section">' +
+                        '<div class="esh-identity-name esh-identity-name--upper">' + user.email + '</div>' +
+                        '<img class="esh-identity-image" src="images/arrow-down.png" style="width:10px;margin-left:4px;" />' +
+                    '</section>' +
+                    '<div class="esh-identity-drop">' +
+                        '<a class="esh-identity-item" href="#">' +
+                            '<img src="images/my_orders.png" style="width:14px;vertical-align:middle;" /> My orders</a>' +
+                        '<a class="esh-identity-item" href="#" onclick="doLogout(); return false;">' +
+                            '<img src="images/logout.png" style="width:14px;vertical-align:middle;" /> Log Out</a>' +
+                    '</div>';
+            })
+            .catch(function () {});
+    }
+
+    window.doLogout = function () {
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/api/account/logout';
+        document.body.appendChild(form);
+        form.submit();
+    };
+
+    function updateBadge() {
+        document.getElementById('basketBadge').textContent = BasketStore.totalItems();
+    }
+
+    function renderBasket() {
+        var items = BasketStore.getAll();
+        var el = document.getElementById('basketContent');
+
+        if (!items.length) {
+            el.innerHTML =
+                '<div class="esh-basket-empty-msg">Your basket is empty.</div>' +
+                '<a href="index.html" class="esh-basket-checkout">Continue Shopping</a>';
+            return;
+        }
+
+        /* ── Column headers ── */
+        var html =
+            '<div class="row esh-basket-titles">' +
+               '<div class="col-2"></div>' +
+               '<div class="col-3 esh-basket-title">Product</div>' +
+               '<div class="col-2 esh-basket-title">Price</div>' +
+               '<div class="col-2 esh-basket-title">Quantity</div>' +
+               '<div class="col-2 esh-basket-title">Cost</div>' +
+            '</div>';
+
+        /* ── Item rows ── */
+        items.forEach(function (item, idx) {
+            var itemName = item.name || item.productName || '';
+            var pic = item.picture || item.pictureUrl || '';
+            /* If no pic stored, try to reconstruct from item id */
+            if (!pic && item.id) pic = 'pics/' + item.id + '.png';
+            if (!pic) pic = 'pics/eCatalog-item-default.png';
+            var lineTotal = (item.unitPrice * item.quantity).toFixed(2);
+            html +=
+                '<div class="row esh-basket-items-row">' +
+                    '<div class="col-2 esh-basket-item">' +
+                        '<img class="esh-basket-image" src="' + pic + '" />' +
+                    '</div>' +
+                    '<div class="col-3 esh-basket-item esh-basket-item--middle">' +
+                        itemName +
+                    '</div>' +
+                    '<div class="col-2 esh-basket-item esh-basket-item--middle">$' +
+                        Number(item.unitPrice).toFixed(2) +
+                    '</div>' +
+                    '<div class="col-2 esh-basket-item esh-basket-item--middle">' +
+                        '<input class="esh-basket-input" type="number" min="1" value="' + item.quantity +
+                        '" data-idx="' + idx + '" />' +
+                    '</div>' +
+                    '<div class="col-2 esh-basket-item esh-basket-item--middle esh-basket-item--mark">$' +
+                        lineTotal +
+                    '</div>' +
+                '</div>';
+        });
+
+        /* ── Total ── */
+        html +=
+            '<div class="row esh-basket-titles esh-basket-titles--clean" style="padding-top:1rem;">' +
+                '<div class="col-6"></div>' +
+                '<div class="col-2 esh-basket-title">Total</div>' +
+                '<div class="col-2 esh-basket-item esh-basket-item--mark" style="font-size:1.5rem;font-weight:700;">$' +
+                    BasketStore.totalPrice().toFixed(2) +
+                '</div>' +
+            '</div>';
+
+        /* ── Buttons ── */
+        html +=
+            '<div style="margin-top:1.5rem;display:flex;gap:1rem;flex-wrap:wrap;">' +
+                '<a href="index.html" class="esh-basket-checkout" style="background:#555;">Continue Shopping</a>' +
+                '<button class="esh-basket-checkout" id="btnUpdate">Update</button>' +
+                '<button class="esh-basket-checkout" id="btnCheckout">Checkout</button>' +
+            '</div>';
+
+        el.innerHTML = html;
+
+        /* ── Button wiring ── */
+        document.getElementById('btnUpdate').addEventListener('click', function () {
+            var inputs = el.querySelectorAll('.esh-basket-input');
+            for (var i = 0; i < inputs.length; i++) {
+                var qty = parseInt(inputs[i].value, 10);
+                var iIdx = parseInt(inputs[i].getAttribute('data-idx'), 10);
+                if (qty > 0) BasketStore.updateQuantity(iIdx, qty);
+                else BasketStore.remove(iIdx);
+            }
+            updateBadge();
+            renderBasket();
+        });
+
+        document.getElementById('btnCheckout').addEventListener('click', function () {
+            alert('Checkout is not implemented in this demo.');
+        });
+    }
+})();
+</script>
+</body>
+</html>
